@@ -10,15 +10,13 @@ import (
 )
 
 func scann(TARGET string, PORTS string) {
-  var argsv = "-p-"
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
 
   scanner, err := nmap.NewScanner(
     ctx,
     nmap.WithTargets(TARGET),
-    args = argsv, 
-    //nmap.WithPorts(PORTS),
+    nmap.WithPorts(PORTS),
   )
   if err != nil {
     log.Fatalf("[-] Error creating nmap scann:\n%v", err)
