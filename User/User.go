@@ -8,6 +8,8 @@ import (
 
 func User() {
 
+  // JSON FORMAT 
+  
   jsonTest := `[{
     "IP": "127.0.0.0",
     "NS": "localhost.com",
