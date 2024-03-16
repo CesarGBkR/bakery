@@ -9,15 +9,20 @@ import (
   "github.com/Ullaakut/nmap/v3"
 )
 
-func scann(TARGET string, PORTS string) {
+func scann(TARGET string, Flags []string) {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
 
   scanner, err := nmap.NewScanner(
     ctx,
     nmap.WithTargets(TARGET),
-    nmap.WithPorts(PORTS),
   )
+
+  for _, flag := range Flags{
+    
+  }
+
+
   if err != nil {
     log.Fatalf("[-] Error creating nmap scann:\n%v", err)
   }
@@ -51,11 +56,11 @@ func scann(TARGET string, PORTS string) {
 
 // TODO add List
 // Example to Nmap pharams: Nmap("127.0.0.0", "1-10000")
-func Nmap(TARGET string, PORT string) {
+func Nmap(TARGET string, Flags []string) {
 
   fmt.Println("[i] Starting Scann ")
 
-  scann(TARGET, PORT)
+  scann(TARGET, Flags)
 
   fmt.Println("Nmap")
 }
