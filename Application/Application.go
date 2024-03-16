@@ -4,14 +4,14 @@ import (
   "fmt"
   "encoding/json"
 
+  "bakery/Application/NmapApplication"
   "bakery/Domain/Object"
-  "bakery/Domain/Enumeration/Portscann"
-)
+  )
 
 // SCAN
-func ApplicationScann(TARGET string, PORT string) {
-  
-  Portscann.Portscann(TARGET, PORT)
+func ApplicationScann(TARGET string) {
+    NmapApplication.AllPorts(Target)
+
 }
 
 func ApplicationFuzzing() {
@@ -41,8 +41,7 @@ func JsonToObject(JSONLIST string) []objects.TargetObject {
 func LvlM(Target objects.TargetObject) {
   switch Target.LVL {
   case 1:
-    var PORTS = "1-65534"
-    ApplicationScann(Target.IP, PORTS)
+    ApplicationScann(Target.IP)
   }
 }
 
