@@ -4,6 +4,6 @@ import (
   "bakery/Service/Enumeration/Portscann"
 )
 
-func Portscann(TARGET string, PORT string) {
-  nmap.Nmap(TARGET, PORT)
+func Portscann(TARGET string, Flags []string) {
+  nmap.Nmap(TARGET Flags)
 }

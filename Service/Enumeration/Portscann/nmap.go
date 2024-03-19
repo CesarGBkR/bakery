@@ -12,20 +12,35 @@ import (
 func scann(TARGET string, Flags []string) {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
+  
+  options := nmap.NewScanner(ctx, nmap.WithTargets(TARGET))
+  //options = append(options, nmap.WithTargets(TARGET))
 
-  scanner, err := nmap.NewScanner(
-    ctx,
-    nmap.WithTargets(TARGET),
-  )
-
-  for _, flag := range Flags{
-    
+    // Agregar las banderas proporcionadas a las opciones del scanner
+  for _, flag := range Flags {
+    switch flag {
+      case "WithSkipHostDiscovery()":
+        options = append(options, nmap.WithSkipHostDiscovery())
+      case "WithDisableDNSResolution()":
+        options = append(options, nmap.WithDisabledDNSResolution())
+      case "WithPorts(1-63000)":
+        options = append(options, nmap.WithPorts("1-63000"))
+      case "WithMinRate(5000)":
+        options = append(options, nmap.WithMinRate(5000))
+        // Agregar otros casos según sea necesario
+    }
   }
 
+    // Crear el scanner con las opciones construidas
+    scanner, err := nmap.NewScanner(ctx, options...)
+    if err != nil {
+        log.Fatalf("[-] Error creating nmap scanner:\n%v", err)
+    }
 
-  if err != nil {
-    log.Fatalf("[-] Error creating nmap scann:\n%v", err)
-  }
+
+  //if err != nil {
+  //  log.Fatalf("[-] Error creating nmap scann:\n%v", err)
+  //}
 
   result, warnings, err := scanner.Run()
   

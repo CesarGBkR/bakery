@@ -14,6 +14,7 @@ func ApplicationScann(TARGET string) {
 
 }
 
+// FUZZING 
 func ApplicationFuzzing() {
 }
 
