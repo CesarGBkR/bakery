@@ -1,7 +1,7 @@
 package User
 
 import (
-  "fmt"
+  //"fmt"
   
   "bakery/Application"
 )
@@ -19,9 +19,6 @@ func User() {
     "IP": "127.0.0.0",
     "NS": "localhost.com",
     "LVL": 1
-  }]`
-
-  fmt.Println("[i] User connected")
-   
+  }]` 
   Application.Application(jsonTest)
 }

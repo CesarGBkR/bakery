@@ -10,7 +10,8 @@ import (
 
 // SCAN
 func ApplicationScann(TARGET string) {
-    NmapApplication.AllPorts(Target)
+    RATE := 5000
+    NmapApplication.AllPorts(TARGET, RATE)
 
 }
 
@@ -53,7 +54,6 @@ func LvlM(Target objects.TargetObject) {
 
 func Application(JSONLIST string) {
   
-  fmt.Println("[i] Application is connected")
   
   var targetList []objects.TargetObject
 

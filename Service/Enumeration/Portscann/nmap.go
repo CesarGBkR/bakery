@@ -9,73 +9,130 @@ import (
   "github.com/Ullaakut/nmap/v3"
 )
 
-func scann(TARGET string, Flags []string) {
+func errorPrint( TYPE string, Err error) {
+
+  if Err != nil {
+    log.Fatalf("[-] Error in %s nmap scanner:\n%v", TYPE, Err)
+  }
+}
+
+//func warningsPring( Warnings string) {
+  //if len(Warnings) > 0 {
+    //log.Printf("[i] nmap run finished with warnings:\n%s", *Warnings)
+  //}
+//}
+
+func scann(TARGET string, TYPE string, PORTS string, RATE int) {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
   
-  options := nmap.NewScanner(ctx, nmap.WithTargets(TARGET))
-  //options = append(options, nmap.WithTargets(TARGET))
+  switch TYPE {
+    case "ScanPorts": 
+      scanner, err := nmap.NewScanner(
+        ctx,
+        nmap.WithTargets(TARGET),
+        nmap.WithPorts(PORTS),
+        nmap.WithMinRate(RATE),
+        nmap.WithDisabledDNSResolution(),
+        nmap.WithSkipHostDiscovery(),
+      )
+      
+      errorPrint(TYPE, err)
+      
+      if err != nil {
+        log.Fatalf("[-] Error in %s nmap scanner:\n%v", TYPE, err)
+      }
 
-    // Agregar las banderas proporcionadas a las opciones del scanner
-  for _, flag := range Flags {
-    switch flag {
-      case "WithSkipHostDiscovery()":
-        options = append(options, nmap.WithSkipHostDiscovery())
-      case "WithDisableDNSResolution()":
-        options = append(options, nmap.WithDisabledDNSResolution())
-      case "WithPorts(1-63000)":
-        options = append(options, nmap.WithPorts("1-63000"))
-      case "WithMinRate(5000)":
-        options = append(options, nmap.WithMinRate(5000))
-        // Agregar otros casos según sea necesario
-    }
-  }
+      result, warnings, err := scanner.Run()
+      if len(*warnings) > 0 {
+        log.Printf("[i] run finished with warnings:\n%s", *warnings)
+      }
 
-    // Crear el scanner con las opciones construidas
-    scanner, err := nmap.NewScanner(ctx, options...)
-    if err != nil {
-        log.Fatalf("[-] Error creating nmap scanner:\n%v", err)
-    }
+      //warningsPrint(warnings)
+      errorPrint(TYPE, err)
+      for _, host := range result.Hosts {
+        if len(host.Ports) == 0 || len(host.Addresses) == 0 {
+          continue
+        } 
+        fmt.Printf("[+] Host %q:\n", host.Addresses[0])
+        fmt.Printf("\tState\tPORT\tProtocol\tS.Name\n")
+        for _,port := range host.Ports {
+          fmt.Printf("\t[%s]\t%d\t%s\t\t%s\n", port.State, port.ID, port.Protocol, port.Service.Name)
+        }
+      }
 
-
-  //if err != nil {
-  //  log.Fatalf("[-] Error creating nmap scann:\n%v", err)
-  //}
-
-  result, warnings, err := scanner.Run()
-  
-  if len(*warnings) > 0 {
-    log.Printf("[i] run finished with warnings:\n%s", *warnings)
-  }
-
-  if err != nil {
-    log.Fatalf("[-] Error executing nmap scann:\n%v", err)
-  }
-
-  for _, host := range result.Hosts {
-    if len(host.Ports) == 0 || len(host.Addresses) == 0 {
-      continue
-    }
+      //fmt.Printf("[+] Nmap done: %d hosts up scanned in %.2f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)
     
-    fmt.Printf("[+] Host %q:\n", host.Addresses[0])
+    case "OSScann":
+      scanner, err := nmap.NewScanner(
+        ctx,
+        nmap.WithTargets(TARGET),
+        nmap.WithMinRate(RATE),
+        nmap.WithDisabledDNSResolution(),
+        nmap.WithSkipHostDiscovery(),
+        nmap.WithOSDetection(),
+      )
+      errorPrint(TYPE, err)
+      result, warnings, err := scanner.Run()
+      if len(*warnings) > 0 {
+        log.Printf("[i] run finished with warnings:\n%s", *warnings)
+      }
+      //warningsPrint(warnings)
+      errorPrint(TYPE, err)
+      fmt.Printf("%d",len(result.Hosts))
 
-    for _,port := range host.Ports {
-      fmt.Printf("\t[%s] Port %d/%s %s\n", port.State, port.ID, port.Protocol, port.Service.Name)
-    }
+    case "ServiceScann": 
+      scanner, err := nmap.NewScanner(
+        ctx,
+        nmap.WithTargets(TARGET),
+        nmap.WithPorts(PORTS),
+        nmap.WithMinRate(RATE),
+        nmap.WithServiceInfo(),
+      )
 
+      errorPrint(TYPE, err)
+      result, warnings, err := scanner.Run()
+      if len(*warnings) > 0 {
+        log.Printf("[i] run finished with warnings:\n%s", *warnings)
+      }
+      //warningsPrint(warnings)
+      errorPrint(TYPE, err)
+      //fmt.Printf(result)
+      fmt.Printf("%d",len(result.Hosts))
+    
+    case "ScriptScann":
+      scanner, err := nmap.NewScanner(
+        ctx,
+        nmap.WithTargets(TARGET),
+        nmap.WithPorts(PORTS),
+        nmap.WithMinRate(RATE),
+        nmap.WithDefaultScript(),
+      )
+      errorPrint(TYPE, err)
+      result, warnings, err := scanner.Run()
+      if len(*warnings) > 0 {
+        log.Printf("[i] run finished with warnings:\n%s", *warnings)
+      }
+      //warningsPrint(warnings)
+      errorPrint(TYPE, err)
+      //fmt.Printf(result)
+      fmt.Printf("%d",len(result.Hosts))
+
+      // TODO: Add optionsScanTechniques mngmnt (reference https://github.com/Ullaakut/nmap/blob/58d93393be5926c8b541e049cc357b6cb9e3eb5e/optionsScanTechniques.go)
+
+    default: 
+      log.Fatalf("[-] Error creating nmap scanner, Error on TYPE")
   }
-
-  fmt.Printf("[+] Nmap done: %d hosts up scanned in %.2f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)
 
 }
 
 // TODO add List
-// Example to Nmap pharams: Nmap("127.0.0.0", "1-10000")
-func Nmap(TARGET string, Flags []string) {
+// Example to Nmap pharams: Nmap("127.0.0.0", "1-10000", "5000")
+func Nmap(TARGET string,TYPE string, PORTS string, RATE int) {
 
   fmt.Println("[i] Starting Scann ")
 
-  scann(TARGET, Flags)
+  scann(TARGET, TYPE, PORTS, RATE)
 
-  fmt.Println("Nmap")
+  //fmt.Println("Nmap")
 }

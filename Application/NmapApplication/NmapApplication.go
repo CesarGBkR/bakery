@@ -4,7 +4,12 @@ import (
   "bakery/Domain/Enumeration/Portscann"
 )
 
-func AllPorts(TARGET string) {
-  Flags := []string{"WithSkipHostDiscovery()", "WithDisableDNSResolution()", "WithPorts(1-63000)", "WithMinRate(5000)"}
-  Portscann.Portscann(TARGET, Flags)
+func AllPorts(TARGET string, RATE int) {
+  TYPE := "ScanPorts"
+  PORTS := "1-65535"
+  Portscann.Portscann(TARGET, TYPE, PORTS, RATE)
 }
+
+func ScanPorts() {
+  
+} 
