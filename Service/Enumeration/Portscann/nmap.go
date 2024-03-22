@@ -7,13 +7,28 @@ import (
   "time"
   
   "github.com/Ullaakut/nmap/v3"
+	osfamily "github.com/Ullaakut/nmap/v3/pkg/osfamilies"
 )
 
 func errorPrint( TYPE string, Err error) {
 
   if Err != nil {
-    log.Fatalf("[-] Error in %s nmap scanner:\n%v", TYPE, Err)
+    fmt.Printf("[-] Error in %s nmap scanner:\n%v", TYPE, Err)
   }
+}
+
+func ProbableOS(Linux, Windows, Other int) string {
+  Os := "Other"
+  max := Other
+  if Windows > max {
+    max = Windows
+    Os = "Windows"
+  }
+  if Linux > max {
+    max = Linux
+    Os = "Linux"
+  }
+  return Os
 }
 
 //func warningsPring( Warnings string) {
@@ -39,47 +54,74 @@ func scann(TARGET string, TYPE string, PORTS string, RATE int) {
       
       errorPrint(TYPE, err)
       
-      if err != nil {
-        log.Fatalf("[-] Error in %s nmap scanner:\n%v", TYPE, err)
-      }
-
       result, warnings, err := scanner.Run()
+      
       if len(*warnings) > 0 {
         log.Printf("[i] run finished with warnings:\n%s", *warnings)
       }
-
-      //warningsPrint(warnings)
+      
       errorPrint(TYPE, err)
-      for _, host := range result.Hosts {
-        if len(host.Ports) == 0 || len(host.Addresses) == 0 {
-          continue
-        } 
-        fmt.Printf("[+] Host %q:\n", host.Addresses[0])
-        fmt.Printf("\tState\tPORT\tProtocol\tS.Name\n")
-        for _,port := range host.Ports {
-          fmt.Printf("\t[%s]\t%d\t%s\t\t%s\n", port.State, port.ID, port.Protocol, port.Service.Name)
+      
+      if len(result.Hosts) > 0 {
+        for _, host := range result.Hosts {
+          
+          if len(host.Ports) == 0 || len(host.Addresses) == 0 {
+            continue
+          } 
+          
+          fmt.Printf("[+] Host %q:\n", host.Addresses[0])
+          fmt.Printf("\tState\tPORT\tProtocol\tS.Name\n")
+          
+          for _,port := range host.Ports {
+            fmt.Printf("\t[%s]\t%d\t%s\t\t%s\n", port.State, port.ID, port.Protocol, port.Service.Name)
+          }
         }
       }
-
-      //fmt.Printf("[+] Nmap done: %d hosts up scanned in %.2f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)
-    
+       
     case "OSScann":
+
       scanner, err := nmap.NewScanner(
         ctx,
         nmap.WithTargets(TARGET),
+        nmap.WithPorts(PORTS),
         nmap.WithMinRate(RATE),
         nmap.WithDisabledDNSResolution(),
         nmap.WithSkipHostDiscovery(),
         nmap.WithOSDetection(),
       )
       errorPrint(TYPE, err)
+
       result, warnings, err := scanner.Run()
+      
       if len(*warnings) > 0 {
         log.Printf("[i] run finished with warnings:\n%s", *warnings)
       }
-      //warningsPrint(warnings)
+      
       errorPrint(TYPE, err)
-      fmt.Printf("%d",len(result.Hosts))
+
+      if len(result.Hosts) > 0 {
+        var (Linux, Windows, Other int)
+
+        for _, host := range result.Hosts {
+          for _, match := range host.OS.Matches {
+			      for _, class := range match.Classes {
+				      switch class.OSFamily() {
+				        case osfamily.Linux:
+                  Linux++
+				        case osfamily.Windows:
+				          Windows++  
+                default:
+                  Other++
+              }
+			      }
+          }
+
+          Os := ProbableOS(Linux, Windows, Other)
+          
+          fmt.Printf("[+] Host %q:\n", host.Addresses[0])
+          fmt.Printf("[i] Probable OS: %s\n", Os)
+        }
+      }
 
     case "ServiceScann": 
       scanner, err := nmap.NewScanner(
@@ -95,9 +137,7 @@ func scann(TARGET string, TYPE string, PORTS string, RATE int) {
       if len(*warnings) > 0 {
         log.Printf("[i] run finished with warnings:\n%s", *warnings)
       }
-      //warningsPrint(warnings)
       errorPrint(TYPE, err)
-      //fmt.Printf(result)
       fmt.Printf("%d",len(result.Hosts))
     
     case "ScriptScann":
@@ -130,9 +170,8 @@ func scann(TARGET string, TYPE string, PORTS string, RATE int) {
 // Example to Nmap pharams: Nmap("127.0.0.0", "1-10000", "5000")
 func Nmap(TARGET string,TYPE string, PORTS string, RATE int) {
 
-  fmt.Println("[i] Starting Scann ")
+  fmt.Println("[i] Starting Scann \n")
 
   scann(TARGET, TYPE, PORTS, RATE)
-
-  //fmt.Println("Nmap")
+  fmt.Println("\n")
 }
