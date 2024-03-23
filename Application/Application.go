@@ -3,16 +3,16 @@ package Application
 import (
   "fmt"
   "encoding/json"
-
-  "bakery/Application/NmapApplication"
+  
+  //"bakery/Application/NmapApplication"
   "bakery/Domain/Object"
-  )
+  "bakery/Domain/Enumeration/PortScann"
+)
 
 // SCAN
 func ApplicationScann(TARGET string) {
     RATE := 5000
-    NmapApplication.AllPorts(TARGET, RATE)
-
+    PortScann.ScannAllPorts(TARGET, RATE)
 }
 
 // FUZZING 
@@ -54,6 +54,7 @@ func LvlM(Target objects.TargetObject) {
 
 func Application(JSONLIST string) {
   
+  //fmt.Println("[i] Application is connected")
   
   var targetList []objects.TargetObject
 
