@@ -4,15 +4,18 @@ import (
   "fmt"
   "encoding/json"
   
-  //"bakery/Application/NmapApplication"
   "bakery/Domain/Object"
   "bakery/Domain/Enumeration/PortScann"
 )
 
 // SCAN
+
 func ApplicationScann(TARGET string) {
-    RATE := 5000
-    PortScann.ScannAllPorts(TARGET, RATE)
+  RATE := 5000 
+  response := PortScann.ScannAllPorts(TARGET, RATE)
+  for _, port := range response.NmapResponse.Hosts.Ports {
+    fmt.Printf("\n%v", port)
+  }
 }
 
 // FUZZING 
@@ -53,9 +56,7 @@ func LvlM(Target objects.TargetObject) {
 // This function manage and invoice otter functions in the file
 
 func Application(JSONLIST string) {
-  
-  //fmt.Println("[i] Application is connected")
-  
+   
   var targetList []objects.TargetObject
 
   targetList = JsonToObject(JSONLIST)

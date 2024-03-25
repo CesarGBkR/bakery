@@ -1,13 +1,13 @@
 package NmapApplication
 
 import (
+  "fmt"
+
   "bakery/Domain/Enumeration/Portscann"
 )
 
 func ScannAllPorts(TARGET string, RATE int) {
-  TYPE := "ScannAllPorts"
-  PORTS := "1-65535"
-  Portscann.Portscann(TARGET, PORTS, RATE, TYPE)
+  response := Portscann.Portscann( TARGET, PORTS )
 }
 
 func ScannPort(TARGET string, PORTS string, RATE int) {

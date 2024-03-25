@@ -1,17 +1,18 @@
 package PortScann
 
 import (
-  "fmt"
+  //"fmt"
   
   "bakery/Domain/Enumeration/PortScann/NmapDomain"
-  //"bakery/Domain/Object/NmapObjects"
+  "bakery/Domain/Object"
 )
 
-func ScannAllPorts(TARGET string, RATE int) {
-  response := NmapDomain.ScannAllPorts(TARGET, RATE)
-   
-  fmt.Printf("%v", response.Hosts.Ports[0].State)
-
+func ScannAllPorts(TARGET string, RATE int) objects.PortScannResponse {
+  
+  var response objects.PortScannResponse 
+  Nmap := NmapDomain.ScannAllPorts(TARGET, RATE)
+  response.NmapResponse = Nmap
+  return response
 }
 
 func ScannPort(TARGET string, PORTS string, RATE int) {
