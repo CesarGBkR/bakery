@@ -8,11 +8,12 @@ Bakery is a small Golang project created to automate basic and repeated task on 
 
 # TO DO
 - [ ] Enumeration
-	- [ ] Port Scanning 	
-		- [ ] LVL Management
-			- [ ] Define LVLs of intrussion
-			- [ ] Implement LVLs
-			- [ ] Test Levels
+	- [ ] Port Scanning
+ 		- [ ] Add Script Scann  	
+		- [X] LVL Management
+			- [X] Define LVLs of intrussion
+			- [X] Implement LVLs
+			- [X] Test Levels
 		- [ ] Add port flows
    	- [ ] Fuzzing
    		- [ ] Replicate Fuzzing Apps binary path management from Nmap Golang library		 
