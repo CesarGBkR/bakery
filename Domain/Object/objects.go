@@ -8,6 +8,7 @@ type TargetObject struct {
   IP string
   NS string
   LVL int
+  RATE *int
 }
 
 type Enumeration struct {
