@@ -41,7 +41,7 @@ func ScannAllPorts(TARGET string, RATE int){
   fmt.Println(builder.String())
 }
 
-func ServiceScann(TARGET string, PORTS string, RATE int){
+func ScannService(TARGET string, PORTS string, RATE int){
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   response := PortScann.ServiceScann(TARGET, PORTS, RATE) 
@@ -59,39 +59,36 @@ func ServiceScann(TARGET string, PORTS string, RATE int){
 func ApplicationFuzzing() {
 }
 
-
-
 // UTILITIES
   // OBJECT CONVERSION
 
 func JsonToObject(JSONLIST string) []objects.TargetObject {
-  
   var objectList []objects.TargetObject
-  
   err := json.Unmarshal([]byte(JSONLIST), &objectList)
-  
   if err != nil { 
-    fmt.Println("[-] Error on JSON deserialization:\n%v", err)
+    fmt.Println("[-] Error on JSON deserialization:\n%s", err)
   }
-
   return objectList
-  
 }
 
-  // LEVEL MNGMNT
+  // TYPE MNGMNT
 
-func LvlM(Target objects.TargetObject) {
-  switch Target.LVL {
-  case 1:
-    RATE := 5000
-    ScannAllPorts(Target.IP, RATE)
-  case 2:
-    RATE := 5000
-    ScannPort(Target.IP, "1234", RATE)
-  case 3:
-    RATE := 5000
-    ServiceScann(Target.IP,"22,5000", RATE )
-  }
+func TypeM(Target objects.TargetObject) {
+  for _, TYPE := range Target.TYPE {
+    TYPES := string(TYPE)
+    switch TYPES {
+      case "P":
+        ScannService(Target.IP, "1-6535", *Target.RATE)
+      
+      case "F":
+        fmt.Printf("TODO")
+        //ScannPort(Target.IP, "1234", RATE)
+      case "U":
+        fmt.Printf("Unu")
+        //RATE := 5000
+        //ServiceScann(Target.IP,"22,5000", RATE )
+      }
+    }
 }
 
 
@@ -107,7 +104,7 @@ func Application(JSONLIST string) {
 
   if len(targetList) > 0 {
     for _, target := range targetList {
-      LvlM(target)
+      TypeM(target)
     }
   }
 }

@@ -13,7 +13,7 @@ func User() {
   jsonTest := `[{
     "IP": "10.10.11.8",
     "NS": "localhost.com",
-    "LVL": 3,
+    "TYPE": "P",
     "RATE": 5000
   }]`
 

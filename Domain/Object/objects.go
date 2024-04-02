@@ -7,7 +7,7 @@ import (
 type TargetObject struct {
   IP string
   NS string
-  LVL int
+  TYPE string
   RATE *int
 }
 
