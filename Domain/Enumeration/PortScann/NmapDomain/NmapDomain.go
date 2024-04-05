@@ -22,7 +22,12 @@ func ScannOS(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {
   return nmap.OSScann(TARGET, PORTS, RATE, TYPE)
 }
 
-func ServiceScann(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {
+func ScannService(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {
   TYPE := "ServiceScann" 
-  return nmap.ServiceScann(TARGET, PORTS, RATE, TYPE)
+  return nmap.ScannService(TARGET, PORTS, RATE, TYPE)
+}
+
+func ScannScript(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {
+  TYPE := "ServiceScann" 
+  return nmap.ScannScript(TARGET, PORTS, RATE, TYPE)
 }

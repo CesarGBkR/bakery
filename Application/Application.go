@@ -5,6 +5,7 @@ import (
   "strings"
   "encoding/json"
   "text/tabwriter"
+  "io/ioutil"
   
   "bakery/Domain/Object"
   "bakery/Domain/Enumeration/PortScann"
@@ -44,7 +45,7 @@ func ScannAllPorts(TARGET string, RATE int){
 func ScannService(TARGET string, PORTS string, RATE int){
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
-  response := PortScann.ServiceScann(TARGET, PORTS, RATE) 
+  response := PortScann.ScannService(TARGET, PORTS, RATE) 
   fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
   for _, port := range response.NmapResponse.Hosts.Ports {
 
@@ -52,8 +53,22 @@ func ScannService(TARGET string, PORTS string, RATE int){
   }
   w.Flush()
   fmt.Println(builder.String())
-
 } 
+
+func ScannScript(TARGET string, PORTS string, RATE int) {
+  var builder strings.Builder
+  w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
+  response := PortScann.ScannScript(TARGET, PORTS, RATE)
+  //fmt.Printf("\n%v",response.NmapResponse.Hosts.Ports)
+  fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
+  for _, port := range response.NmapResponse.Hosts.Ports {
+    fmt.Print("Test:\t%s\n", port.Scripts)
+    //fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
+  }
+  w.Flush()
+  fmt.Println(builder.String())
+
+}
 
 // FUZZING 
 func ApplicationFuzzing() {
@@ -78,15 +93,12 @@ func TypeM(Target objects.TargetObject) {
     TYPES := string(TYPE)
     switch TYPES {
       case "P":
-        ScannService(Target.IP, "1-6535", *Target.RATE)
+        //ScannScript(Target.IP, "1-6535", Target.RATE)
+        ScannService(Target.IP, "1-6535", Target.RATE)
       
       case "F":
         fmt.Printf("TODO")
         //ScannPort(Target.IP, "1234", RATE)
-      case "U":
-        fmt.Printf("Unu")
-        //RATE := 5000
-        //ServiceScann(Target.IP,"22,5000", RATE )
       }
     }
 }
@@ -96,14 +108,28 @@ func TypeM(Target objects.TargetObject) {
 // Main function
 // This function manage and invoice otter functions in the file
 
-func Application(JSONLIST string) {
+func ApplicationMain(FILE string, IP string, NS string, RATE int, TYPE string) {
+  
+  var TargetList []objects.TargetObject
+
+  if FILE != "" {
+    contenido, err := ioutil.ReadFile(FILE)
+    if err != nil {
+        fmt.Printf("[!] Error reading file: %v\n", err)
+      }
+    TargetList = JsonToObject(string(contenido))
+  } else {
+    Target := objects.TargetObject {
+      IP: IP,
+      NS: NS,
+      TYPE: TYPE,
+      RATE: RATE,
+    }
+    TargetList = append(TargetList, Target)
+  }
    
-  var targetList []objects.TargetObject
-
-  targetList = JsonToObject(JSONLIST)
-
-  if len(targetList) > 0 {
-    for _, target := range targetList {
+  if len(TargetList) > 0 {
+    for _, target := range TargetList {
       TypeM(target)
     }
   }

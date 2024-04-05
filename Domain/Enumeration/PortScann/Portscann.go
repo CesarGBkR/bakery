@@ -31,10 +31,18 @@ func ScannOS(TARGET string, PORTS string, RATE int) objects.PortScannResponse {
   return response
 }
 
-func ServiceScann(TARGET string, PORTS string, RATE int) objects.PortScannResponse {
+func ScannService(TARGET string, PORTS string, RATE int) objects.PortScannResponse {
   
   var response objects.PortScannResponse
-  Nmap := NmapDomain.ServiceScann(TARGET, PORTS, RATE)
+  Nmap := NmapDomain.ScannService(TARGET, PORTS, RATE)
+  response.NmapResponse = Nmap
+  return response
+}
+
+func ScannScript(TARGET string, PORTS string, RATE int) objects.PortScannResponse {
+  
+  var response objects.PortScannResponse
+  Nmap := NmapDomain.ScannScript(TARGET, PORTS, RATE)
   response.NmapResponse = Nmap
   return response
 }

@@ -23,6 +23,7 @@ type Port struct {
   ID uint16
   Protocol string
   Services Service
+  Scripts []Script
 }
 
 type Service struct {
@@ -30,4 +31,9 @@ type Service struct {
   Version string
   Product string
   Extra string
+}
+
+type Script struct {
+  ID string
+  Output string
 }

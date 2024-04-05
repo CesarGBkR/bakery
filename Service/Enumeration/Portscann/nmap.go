@@ -74,7 +74,7 @@ func PortScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.S
   return Response
 }
 
-func ServiceScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.ScannResponse {
+func ScannService(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.ScannResponse {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
   
@@ -174,7 +174,7 @@ func OSScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.Sca
 
 
 // TODO: Add functionality
-func ScriptScann(TARGET string, PORTS string, RATE int, TYPE string) {
+func ScannScript(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.ScannResponse {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
  
@@ -192,7 +192,43 @@ func ScriptScann(TARGET string, PORTS string, RATE int, TYPE string) {
   errorPrint(TYPE, errBuild) 
   result, warnings, errExec := scanner.Run()
   Response.ErrExec, Response.Warn = errExec, *warnings 
-  fmt.Printf("%v",  result)
+  if len(result.Hosts) > 0 {
+    // var HostResponse NmapObjects.Host
+    host := result.Hosts[0] 
+    if len(host.Ports) == 0 || len(host.Addresses) == 0 {
+      fmt.Printf("[-] No Ports or Addresses for: %s", TARGET)
+    }else {
+      var PortsResponse []NmapObjects.Port
+      for _, port := range host.Ports {
+
+        ServiceResponse := NmapObjects.Service {
+          Name: port.Service.Name,
+          Version: port.Service.Version,
+          Product: port.Service.Product,
+          Extra: port.Service.ExtraInfo,
+        }
+
+        Port := NmapObjects.Port {
+          State: port.State.String(),
+          ID: port.ID,
+          Protocol: port.Protocol,
+          Services: ServiceResponse,  
+        }
+
+        var ScriptsResponse []NmapObjects.Script
+        for _, script := range port.Scripts{
+          Script := NmapObjects.Script {
+            ID: script.ID,
+            Output: script.Output,
+          }
+          ScriptsResponse = append(ScriptsResponse, Script) 
+        } 
+        Port.Scripts = ScriptsResponse
+        PortsResponse = append(PortsResponse, Port)  
+      }
+    }
+  }
+  return Response
 }
 
 

@@ -1,33 +1,27 @@
 package User
 
 import (
-  //"fmt"
-  
+  "flag"
+
   "bakery/Application"
 )
 
 func User() {
+ 
+  var (
+    FILE string
+    IP string
+    NS string
+    RATE int
+    TYPE string    
+  )
 
-  // JSON FORMAT 
+  flag.StringVar(&FILE, "F", "", "Tatget File Route")
+  flag.StringVar(&IP, "IP", "127.0.0.1", "Target IP")
+  flag.StringVar(&NS, "NS", "localhost.com", "Target Name Server")
+  flag.IntVar(&RATE, "R", 5000, "Min RATE")
+  flag.StringVar(&TYPE, "T", "P", "Action To Perform")
+  flag.Parse()
   
-  jsonTest := `[{
-    "IP": "10.10.11.8",
-    "NS": "localhost.com",
-    "TYPE": "P",
-    "RATE": 5000
-  }]`
-
-  //jsonTest := `[{
-    //"IP": "127.0.0.0",
-    //"NS": "localhost.com",
-    //"LVL": 1,
-    //"RATE": 5000
-  //},
-  //{
-    //"IP": "127.0.0.0",
-    //"NS": "localhost.com",
-    //"LVL": 1,
-    //"RATE": 5000
-  //}]` 
-  Application.Application(jsonTest)
+  Application.ApplicationMain(FILE, IP, NS, RATE, TYPE)
 }
