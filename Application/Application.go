@@ -48,7 +48,6 @@ func ScannService(TARGET string, PORTS string, RATE int){
   response := PortScann.ScannService(TARGET, PORTS, RATE) 
   fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
   for _, port := range response.NmapResponse.Hosts.Ports {
-
     fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
   }
   w.Flush()
@@ -60,10 +59,11 @@ func ScannScript(TARGET string, PORTS string, RATE int) {
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   response := PortScann.ScannScript(TARGET, PORTS, RATE)
   //fmt.Printf("\n%v",response.NmapResponse.Hosts.Ports)
-  fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
+  fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tSC.ID\tSC.OUT\n")
   for _, port := range response.NmapResponse.Hosts.Ports {
-    fmt.Print("Test:\t%s\n", port.Scripts)
-    //fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
+    for _, script := range port.Scripts {
+      fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, script.ID,script.Output)
+    }
   }
   w.Flush()
   fmt.Println(builder.String())
@@ -93,8 +93,8 @@ func TypeM(Target objects.TargetObject) {
     TYPES := string(TYPE)
     switch TYPES {
       case "P":
-        //ScannScript(Target.IP, "1-6535", Target.RATE)
-        ScannService(Target.IP, "1-6535", Target.RATE)
+        ScannScript(Target.IP, Target.PORTS, Target.RATE)
+        //ScannService(Target.IP, Target.PORTS, Target.RATE)
       
       case "F":
         fmt.Printf("TODO")
@@ -103,12 +103,10 @@ func TypeM(Target objects.TargetObject) {
     }
 }
 
-
-
 // Main function
 // This function manage and invoice otter functions in the file
 
-func ApplicationMain(FILE string, IP string, NS string, RATE int, TYPE string) {
+func ApplicationMain(FILE string, IP string, NS string, PORTS string, RATE int, TYPE string) {
   
   var TargetList []objects.TargetObject
 
@@ -122,6 +120,7 @@ func ApplicationMain(FILE string, IP string, NS string, RATE int, TYPE string) {
     Target := objects.TargetObject {
       IP: IP,
       NS: NS,
+      PORTS: PORTS,
       TYPE: TYPE,
       RATE: RATE,
     }

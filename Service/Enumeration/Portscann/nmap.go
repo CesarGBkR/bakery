@@ -193,14 +193,13 @@ func ScannScript(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects
   result, warnings, errExec := scanner.Run()
   Response.ErrExec, Response.Warn = errExec, *warnings 
   if len(result.Hosts) > 0 {
-    // var HostResponse NmapObjects.Host
+    var HostResponse NmapObjects.Host
     host := result.Hosts[0] 
     if len(host.Ports) == 0 || len(host.Addresses) == 0 {
       fmt.Printf("[-] No Ports or Addresses for: %s", TARGET)
     }else {
       var PortsResponse []NmapObjects.Port
       for _, port := range host.Ports {
-
         ServiceResponse := NmapObjects.Service {
           Name: port.Service.Name,
           Version: port.Service.Version,
@@ -214,7 +213,6 @@ func ScannScript(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects
           Protocol: port.Protocol,
           Services: ServiceResponse,  
         }
-
         var ScriptsResponse []NmapObjects.Script
         for _, script := range port.Scripts{
           Script := NmapObjects.Script {
@@ -222,11 +220,15 @@ func ScannScript(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects
             Output: script.Output,
           }
           ScriptsResponse = append(ScriptsResponse, Script) 
-        } 
+        }
+
+        //fmt.Printf("%v", ScriptsResponse)
         Port.Scripts = ScriptsResponse
         PortsResponse = append(PortsResponse, Port)  
       }
+      HostResponse.Ports = PortsResponse
     }
+    Response.Hosts = HostResponse
   }
   return Response
 }

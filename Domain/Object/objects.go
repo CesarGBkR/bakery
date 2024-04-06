@@ -7,6 +7,7 @@ import (
 type TargetObject struct {
   IP string
   NS string
+  PORTS string
   TYPE string
   RATE int
 }
