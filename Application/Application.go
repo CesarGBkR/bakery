@@ -6,6 +6,7 @@ import (
   "encoding/json"
   "text/tabwriter"
   "io/ioutil"
+  "sync"
   
   "bakery/Domain/Object"
   "bakery/Domain/Enumeration/PortScann"
@@ -17,7 +18,8 @@ func ApplicationScann(TARGET string) {
 
 }
 
-func ScannPort(TARGET string, PORTS string, RATE int){
+func ScannPort(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int){
+  defer wg.Done()
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   response := PortScann.ScannPort(TARGET, PORTS, RATE) 
@@ -30,7 +32,8 @@ func ScannPort(TARGET string, PORTS string, RATE int){
   fmt.Println(builder.String())
 }
 
-func ScannAllPorts(TARGET string, RATE int){
+func ScannAllPorts(wg *sync.WaitGroup, TARGET string, RATE int){
+  defer wg.Done()
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   response := PortScann.ScannAllPorts(TARGET, RATE)
@@ -42,7 +45,8 @@ func ScannAllPorts(TARGET string, RATE int){
   fmt.Println(builder.String())
 }
 
-func ScannService(TARGET string, PORTS string, RATE int){
+func ScannService(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int){
+  defer wg.Done()
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   response := PortScann.ScannService(TARGET, PORTS, RATE) 
@@ -54,7 +58,8 @@ func ScannService(TARGET string, PORTS string, RATE int){
   fmt.Println(builder.String())
 } 
 
-func ScannScript(TARGET string, PORTS string, RATE int) {
+func ScannScript(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int) {
+  defer wg.Done()
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   response := PortScann.ScannScript(TARGET, PORTS, RATE)
@@ -67,7 +72,6 @@ func ScannScript(TARGET string, PORTS string, RATE int) {
   }
   w.Flush()
   fmt.Println(builder.String())
-
 }
 
 // FUZZING 
@@ -93,9 +97,12 @@ func TypeM(Target objects.TargetObject) {
     TYPES := string(TYPE)
     switch TYPES {
       case "P":
-        ScannScript(Target.IP, Target.PORTS, Target.RATE)
-        //ScannService(Target.IP, Target.PORTS, Target.RATE)
-      
+        var wg sync.WaitGroup
+        wg.Add(2)
+        go ScannScript(&wg, Target.IP, Target.PORTS, Target.RATE)
+        go ScannService(&wg, Target.IP, Target.PORTS, Target.RATE)
+        wg.Wait()
+        //fmt.Printf("\nDone\n")
       case "F":
         fmt.Printf("TODO")
         //ScannPort(Target.IP, "1234", RATE)
