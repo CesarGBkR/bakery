@@ -221,8 +221,6 @@ func ScannScript(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects
           }
           ScriptsResponse = append(ScriptsResponse, Script) 
         }
-
-        //fmt.Printf("%v", ScriptsResponse)
         Port.Scripts = ScriptsResponse
         PortsResponse = append(PortsResponse, Port)  
       }

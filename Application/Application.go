@@ -7,6 +7,7 @@ import (
   "text/tabwriter"
   "io/ioutil"
   "sync"
+  "reflect"
   
   "bakery/Domain/Object"
   "bakery/Domain/Enumeration/PortScann"
@@ -58,20 +59,10 @@ func ScannService(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int){
   fmt.Println(builder.String())
 } 
 
-func ScannScript(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int) {
+func ScannScript(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int) objects.PortScannResponse {
   defer wg.Done()
-  var builder strings.Builder
-  w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
-  response := PortScann.ScannScript(TARGET, PORTS, RATE)
-  //fmt.Printf("\n%v",response.NmapResponse.Hosts.Ports)
-  fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tSC.ID\tSC.OUT\n")
-  for _, port := range response.NmapResponse.Hosts.Ports {
-    for _, script := range port.Scripts {
-      fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, script.ID,script.Output)
-    }
-  }
-  w.Flush()
-  fmt.Println(builder.String())
+  return PortScann.ScannScript(TARGET, PORTS, RATE)
+  
 }
 
 // FUZZING 
@@ -80,6 +71,29 @@ func ApplicationFuzzing() {
 
 // UTILITIES
   // OBJECT CONVERSION
+
+func Printer(Response objects.Response) {
+  var builder strings.Builder
+  tipo := reflect.TypeOf(Response)
+  valor := reflect.ValueOf(Response)
+  w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
+  
+  for i := 0; i < tipo.NumField(); i++ {
+    campo := tipo.Field(i)
+    valorCampo := valor.Field(i).Interface()
+    fmt.Printf("Campo%s: Value%v\n", campo.Name, valorCampo)
+  }
+  fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tSC.ID\tSC.OUT\n")
+  for _, port := range Response.Enumeration.PortScann.NmapResponse.Hosts.Ports {
+    for _, script := range port.Scripts {
+      fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, script.ID,script.Output)
+    }
+  }
+  w.Flush()
+  fmt.Println(builder.String())
+
+}
+
 
 func JsonToObject(JSONLIST string) []objects.TargetObject {
   var objectList []objects.TargetObject

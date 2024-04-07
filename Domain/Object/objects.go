@@ -12,6 +12,10 @@ type TargetObject struct {
   RATE int
 }
 
+type Response struct {
+  Enumeration Enumeration
+}
+
 type Enumeration struct {
   PortScann PortScannResponse
   Fuzzing FuzzingResponse
