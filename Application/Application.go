@@ -46,23 +46,26 @@ func ScannAllPorts(wg *sync.WaitGroup, TARGET string, RATE int){
   fmt.Println(builder.String())
 }
 
-func ScannService(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int){
+func ScannService(id int, wg *sync.WaitGroup, Enumeration chan<- objects.PortScannResponse, TARGET string, PORTS string, RATE int){
   defer wg.Done()
-  var builder strings.Builder
-  w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   response := PortScann.ScannService(TARGET, PORTS, RATE) 
-  fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
-  for _, port := range response.NmapResponse.Hosts.Ports {
-    fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
-  }
-  w.Flush()
-  fmt.Println(builder.String())
+  Printer(objects.Response{
+    Enumeration: objects.Enumeration{
+        PortScann: response,
+    },
+  })  
+  Enumeration <- response
 } 
 
-func ScannScript(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int) objects.PortScannResponse {
+func ScannScript(id int, wg *sync.WaitGroup, Enumeration chan<- objects.PortScannResponse, TARGET string, PORTS string, RATE int) {
   defer wg.Done()
-  return PortScann.ScannScript(TARGET, PORTS, RATE)
-  
+  response := PortScann.ScannScript(TARGET, PORTS, RATE)
+  Printer(objects.Response{
+    Enumeration: objects.Enumeration{
+        PortScann: response,
+    },
+  })
+  Enumeration <- response
 }
 
 // FUZZING 
@@ -75,23 +78,32 @@ func ApplicationFuzzing() {
 func Printer(Response objects.Response) {
   var builder strings.Builder
   tipo := reflect.TypeOf(Response)
-  valor := reflect.ValueOf(Response)
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
   
   for i := 0; i < tipo.NumField(); i++ {
     campo := tipo.Field(i)
-    valorCampo := valor.Field(i).Interface()
-    fmt.Printf("Campo%s: Value%v\n", campo.Name, valorCampo)
-  }
-  fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tSC.ID\tSC.OUT\n")
-  for _, port := range Response.Enumeration.PortScann.NmapResponse.Hosts.Ports {
-    for _, script := range port.Scripts {
-      fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, script.ID,script.Output)
+    
+    switch campo.Name {
+      case "Enumeration":
+        PORTS := Response.Enumeration.PortScann.NmapResponse.Hosts.Ports
+        if PORTS[0].Services.Version != ""{
+          fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
+          for _, port := range PORTS {
+            fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
+          }
+        }else{
+          fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tSC.ID\tSC.OUT\n")
+          for _, port := range PORTS {
+            for _, script := range port.Scripts {
+              fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, script.ID,script.Output)
+            }
+          }
+        }
+        
+        w.Flush()
+        fmt.Println(builder.String())
     }
   }
-  w.Flush()
-  fmt.Println(builder.String())
-
 }
 
 
@@ -107,21 +119,28 @@ func JsonToObject(JSONLIST string) []objects.TargetObject {
   // TYPE MNGMNT
 
 func TypeM(Target objects.TargetObject) {
+
   for _, TYPE := range Target.TYPE {
     TYPES := string(TYPE)
     switch TYPES {
       case "P":
+        PortEnum := make(chan objects.PortScannResponse, 2)
+        //Services := make(chan objects.PortScannResponse, 1)
+        
         var wg sync.WaitGroup
         wg.Add(2)
-        go ScannScript(&wg, Target.IP, Target.PORTS, Target.RATE)
-        go ScannService(&wg, Target.IP, Target.PORTS, Target.RATE)
+        
+        go ScannScript(1, &wg, PortEnum, Target.IP, Target.PORTS, Target.RATE)
+        go ScannService(2, &wg, PortEnum, Target.IP, Target.PORTS, Target.RATE)
+        
         wg.Wait()
-        //fmt.Printf("\nDone\n")
+        close(PortEnum)
+
       case "F":
         fmt.Printf("TODO")
         //ScannPort(Target.IP, "1234", RATE)
-      }
     }
+  }
 }
 
 // Main function
