@@ -7,42 +7,42 @@ import (
   "bakery/Domain/Object"
 )
 
-func ScannAllPorts(TARGET string, RATE int) objects.PortScannResponse {
+func ScannAllPorts(TARGET objects.TargetObject) objects.PortScannResponse {
   
   var response objects.PortScannResponse 
-  Nmap := NmapDomain.ScannAllPorts(TARGET, RATE)
+  Nmap := NmapDomain.ScannAllPorts(TARGET)
   response.NmapResponse = Nmap
   return response
 }
 
-func ScannPort(TARGET string, PORTS string, RATE int) objects.PortScannResponse {
+func ScannPort(TARGET objects.TargetObject) objects.PortScannResponse {
 
   var response objects.PortScannResponse
-  Nmap := NmapDomain.ScannPort(TARGET, PORTS, RATE)
+  Nmap := NmapDomain.ScannPort(TARGET)
   response.NmapResponse = Nmap
   return response
 }
 
-func ScannOS(TARGET string, PORTS string, RATE int) objects.PortScannResponse {  
+func ScannOS(TARGET objects.TargetObject) objects.PortScannResponse {  
   
   var response objects.PortScannResponse
-  Nmap := NmapDomain.ScannOS(TARGET, PORTS, RATE)
+  Nmap := NmapDomain.ScannOS(TARGET)
   response.NmapResponse = Nmap
   return response
 }
 
-func ScannService(TARGET string, PORTS string, RATE int) objects.PortScannResponse {
+func ScannService(TARGET objects.TargetObject) objects.PortScannResponse {
   
   var response objects.PortScannResponse
-  Nmap := NmapDomain.ScannService(TARGET, PORTS, RATE)
+  Nmap := NmapDomain.ScannService(TARGET)
   response.NmapResponse = Nmap
   return response
 }
 
-func ScannScript(TARGET string, PORTS string, RATE int) objects.PortScannResponse {
+func ScannScript(TARGET objects.TargetObject) objects.PortScannResponse {
   
   var response objects.PortScannResponse
-  Nmap := NmapDomain.ScannScript(TARGET, PORTS, RATE)
+  Nmap := NmapDomain.ScannScript(TARGET)
   response.NmapResponse = Nmap
   return response
 }

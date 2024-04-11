@@ -9,6 +9,7 @@ import (
   "github.com/Ullaakut/nmap/v3"
 	osfamily "github.com/Ullaakut/nmap/v3/pkg/osfamilies"
   "bakery/Domain/Object/NmapObjects"
+  "bakery/Domain/Object"
 )
 
 func errorPrint( TYPE string, Err error) {
@@ -32,7 +33,7 @@ func ProbableOS(Linux, Windows, Other int) string {
   return Os
 }
 
-func PortScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.ScannResponse {
+func PortScann(TARGET objects.TargetObject) NmapObjects.ScannResponse {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
 
@@ -40,15 +41,15 @@ func PortScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.S
       
   scanner, errBuild := nmap.NewScanner(
     ctx,
-    nmap.WithTargets(TARGET),
-    nmap.WithPorts(PORTS),
-    nmap.WithMinRate(RATE),
+    nmap.WithTargets(TARGET.IP),
+    nmap.WithPorts(TARGET.PORTS),
+    nmap.WithMinRate(TARGET.RATE),
     nmap.WithDisabledDNSResolution(),
     nmap.WithSkipHostDiscovery(),
   )
       
   Response.ErrBuild = errBuild
-  errorPrint(TYPE, errBuild) 
+  errorPrint(TARGET.TYPE, errBuild) 
   result, warnings, errExec := scanner.Run()
   Response.ErrExec, Response.Warn = errExec, *warnings 
   
@@ -74,7 +75,7 @@ func PortScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.S
   return Response
 }
 
-func ScannService(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.ScannResponse {
+func ScannService(TARGET objects.TargetObject) NmapObjects.ScannResponse {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
   
@@ -82,14 +83,14 @@ func ScannService(TARGET string, PORTS string, RATE int, TYPE string) NmapObject
 
   scanner, errBuild := nmap.NewScanner(
     ctx,
-    nmap.WithTargets(TARGET),
-    nmap.WithPorts(PORTS),
-    nmap.WithMinRate(RATE),
+    nmap.WithTargets(TARGET.IP),
+    nmap.WithPorts(TARGET.PORTS),
+    nmap.WithMinRate(TARGET.RATE),
     nmap.WithServiceInfo(),
   )
   
   Response.ErrBuild = errBuild
-  errorPrint(TYPE, errBuild) 
+  errorPrint(TARGET.TYPE, errBuild) 
   result, warnings, errExec := scanner.Run()
   Response.ErrExec, Response.Warn = errExec, *warnings 
     
@@ -125,7 +126,7 @@ func ScannService(TARGET string, PORTS string, RATE int, TYPE string) NmapObject
   return Response
 }
 
-func OSScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.ScannResponse {
+func OSScann(TARGET objects.TargetObject) NmapObjects.ScannResponse {
   
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
@@ -134,16 +135,16 @@ func OSScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.Sca
 
   scanner, errBuild := nmap.NewScanner(
     ctx,
-    nmap.WithTargets(TARGET),
-    nmap.WithPorts(PORTS),
-    nmap.WithMinRate(RATE),
+    nmap.WithTargets(TARGET.IP),
+    nmap.WithPorts(TARGET.PORTS),
+    nmap.WithMinRate(TARGET.RATE),
     nmap.WithDisabledDNSResolution(),
     nmap.WithSkipHostDiscovery(),
     nmap.WithOSDetection(),
   )
 
   Response.ErrBuild = errBuild
-  errorPrint(TYPE, errBuild) 
+  errorPrint(TARGET.TYPE, errBuild) 
   result, warnings, errExec := scanner.Run()
   Response.ErrExec, Response.Warn = errExec, *warnings 
  
@@ -166,15 +167,13 @@ func OSScann(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.Sca
     }
     HostResponse.OS = ProbableOS(Linux, Windows, Other)   
     Response.Hosts = HostResponse
-    //fmt.Printf("[+] Host %q:\n", host.Addresses[0])
-    //fmt.Printf("[i] Probable OS: %s\n", Os)
   }
   return Response
 }
 
 
 // TODO: Add functionality
-func ScannScript(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects.ScannResponse {
+func ScannScript(TARGET objects.TargetObject) NmapObjects.ScannResponse {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
   defer cancel()
  
@@ -182,14 +181,14 @@ func ScannScript(TARGET string, PORTS string, RATE int, TYPE string) NmapObjects
 
   scanner, errBuild := nmap.NewScanner(
     ctx,
-    nmap.WithTargets(TARGET),
-    nmap.WithPorts(PORTS),
-    nmap.WithMinRate(RATE),
+    nmap.WithTargets(TARGET.IP),
+    nmap.WithPorts(TARGET.PORTS),
+    nmap.WithMinRate(TARGET.RATE),
     nmap.WithDefaultScript(),
   )
 
   Response.ErrBuild = errBuild
-  errorPrint(TYPE, errBuild) 
+  errorPrint(TARGET.TYPE, errBuild) 
   result, warnings, errExec := scanner.Run()
   Response.ErrExec, Response.Warn = errExec, *warnings 
   if len(result.Hosts) > 0 {

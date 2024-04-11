@@ -11,6 +11,7 @@ import (
   
   "bakery/Domain/Object"
   "bakery/Domain/Enumeration/PortScann"
+  "bakery/Domain/Utils"
 )
 
 // SCAN
@@ -19,11 +20,11 @@ func ApplicationScann(TARGET string) {
 
 }
 
-func ScannPort(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int){
+func ScannPort(wg *sync.WaitGroup, TARGET objects.TargetObject){
   defer wg.Done()
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
-  response := PortScann.ScannPort(TARGET, PORTS, RATE) 
+  response := PortScann.ScannPort(TARGET) 
   fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\n")
   for _, port := range response.NmapResponse.Hosts.Ports {
 
@@ -33,11 +34,13 @@ func ScannPort(wg *sync.WaitGroup, TARGET string, PORTS string, RATE int){
   fmt.Println(builder.String())
 }
 
-func ScannAllPorts(wg *sync.WaitGroup, TARGET string, RATE int){
+
+// DEPRECATED Not function yet
+func ScannAllPorts(wg *sync.WaitGroup, TARGET objects.TargetObject){
   defer wg.Done()
   var builder strings.Builder
   w := tabwriter.NewWriter(&builder, 0, 0, 1, ' ', 0)
-  response := PortScann.ScannAllPorts(TARGET, RATE)
+  response := PortScann.ScannAllPorts(TARGET)
   fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\n")
   for _, port := range response.NmapResponse.Hosts.Ports {
     fmt.Fprintf(w, "%s\t%d\t%s\n", port.State, port.ID, port.Protocol)
@@ -46,23 +49,23 @@ func ScannAllPorts(wg *sync.WaitGroup, TARGET string, RATE int){
   fmt.Println(builder.String())
 }
 
-func ScannService(id int, wg *sync.WaitGroup, Enumeration chan<- objects.PortScannResponse, TARGET string, PORTS string, RATE int){
+func ScannService(id int, wg *sync.WaitGroup, Enumeration chan<- objects.PortScannResponse, TARGET objects.TargetObject){
   defer wg.Done()
-  response := PortScann.ScannService(TARGET, PORTS, RATE) 
+  response := PortScann.ScannService(TARGET) 
   Printer(objects.Response{
     Enumeration: objects.Enumeration{
-        PortScann: response,
+      PortScann: response,
     },
   })  
   Enumeration <- response
 } 
 
-func ScannScript(id int, wg *sync.WaitGroup, Enumeration chan<- objects.PortScannResponse, TARGET string, PORTS string, RATE int) {
+func ScannScript(id int, wg *sync.WaitGroup, Enumeration chan<- objects.PortScannResponse, TARGET objects.TargetObject) {
   defer wg.Done()
-  response := PortScann.ScannScript(TARGET, PORTS, RATE)
+  response := PortScann.ScannScript(TARGET)
   Printer(objects.Response{
     Enumeration: objects.Enumeration{
-        PortScann: response,
+      PortScann: response,
     },
   })
   Enumeration <- response
@@ -73,8 +76,7 @@ func ApplicationFuzzing() {
 }
 
 // UTILITIES
-  // OBJECT CONVERSION
-
+  // PRINTER
 func Printer(Response objects.Response) {
   var builder strings.Builder
   tipo := reflect.TypeOf(Response)
@@ -86,27 +88,32 @@ func Printer(Response objects.Response) {
     switch campo.Name {
       case "Enumeration":
         PORTS := Response.Enumeration.PortScann.NmapResponse.Hosts.Ports
-        if PORTS[0].Services.Version != ""{
-          fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
-          for _, port := range PORTS {
-            fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
-          }
-        }else{
-          fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tSC.ID\tSC.OUT\n")
-          for _, port := range PORTS {
-            for _, script := range port.Scripts {
-              fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, script.ID,script.Output)
+        if len(PORTS) > 0 {
+          if PORTS[0].Services.Version != "" {
+            fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
+            for _, port := range PORTS {
+              fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
+            }
+          }else {
+            fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tSC.ID\tSC.OUT\n")
+            for _, port := range PORTS {
+              for _, script := range port.Scripts {
+                fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, script.ID,script.Output)
+              }
             }
           }
-        }
+        
         
         w.Flush()
-        fmt.Println(builder.String())
+        fmt.Println(builder.String()) 
+      }else {
+        fmt.Printf("\n[-] No Open Ports\n")
+      }
     }
   }
 }
 
-
+  // OBJECT CONVERSION
 func JsonToObject(JSONLIST string) []objects.TargetObject {
   var objectList []objects.TargetObject
   err := json.Unmarshal([]byte(JSONLIST), &objectList)
@@ -117,27 +124,26 @@ func JsonToObject(JSONLIST string) []objects.TargetObject {
 }
 
   // TYPE MNGMNT
-
-func TypeM(Target objects.TargetObject) {
-
-  for _, TYPE := range Target.TYPE {
+func TypeM(TARGET objects.TargetObject) {
+  
+  for _, TYPE := range TARGET.TYPE {
     TYPES := string(TYPE)
     switch TYPES {
       case "P":
         PortEnum := make(chan objects.PortScannResponse, 2)
-        //Services := make(chan objects.PortScannResponse, 1)
         
         var wg sync.WaitGroup
         wg.Add(2)
         
-        go ScannScript(1, &wg, PortEnum, Target.IP, Target.PORTS, Target.RATE)
-        go ScannService(2, &wg, PortEnum, Target.IP, Target.PORTS, Target.RATE)
+        go ScannScript(1, &wg, PortEnum, TARGET)
+        go ScannService(2, &wg, PortEnum, TARGET)
         
         wg.Wait()
         close(PortEnum)
 
       case "F":
-        fmt.Printf("TODO")
+        fmt.Printf("Testing")
+        Utils.Requester()
         //ScannPort(Target.IP, "1234", RATE)
     }
   }

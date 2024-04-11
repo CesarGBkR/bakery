@@ -3,31 +3,32 @@ package NmapDomain
 import (
   "bakery/Service/Enumeration/Portscann"
   "bakery/Domain/Object/NmapObjects"
+  "bakery/Domain/Object"
 )
 
-func ScannAllPorts(TARGET string, RATE int) NmapObjects.ScannResponse {
-  TYPE := "ScannAllPorts"
-  PORTS := "1-65535"
-  return nmap.PortScann(TARGET, PORTS, RATE, TYPE)
+func ScannAllPorts(TARGET objects.TargetObject) NmapObjects.ScannResponse {
+  TARGET.TYPE = "ScannAllPorts"
+  TARGET.PORTS = "1-65535"
+  return nmap.PortScann(TARGET)
 }
 
-func ScannPort(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {
-  TYPE := "ScannPorts"
-  return nmap.PortScann(TARGET, PORTS, RATE, TYPE)
+func ScannPort(TARGET objects.TargetObject) NmapObjects.ScannResponse {
+  TARGET.TYPE= "ScannPorts"
+  return nmap.PortScann(TARGET)
 
 }
 
-func ScannOS(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {  
-  TYPE := "ScannOS"
-  return nmap.OSScann(TARGET, PORTS, RATE, TYPE)
+func ScannOS(TARGET objects.TargetObject) NmapObjects.ScannResponse {  
+  TARGET.TYPE = "ScannOS"
+  return nmap.OSScann(TARGET)
 }
 
-func ScannService(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {
-  TYPE := "ServiceScann" 
-  return nmap.ScannService(TARGET, PORTS, RATE, TYPE)
+func ScannService(TARGET objects.TargetObject) NmapObjects.ScannResponse {
+  TARGET.TYPE = "ServiceScann" 
+  return nmap.ScannService(TARGET)
 }
 
-func ScannScript(TARGET string, PORTS string, RATE int) NmapObjects.ScannResponse {
-  TYPE := "ServiceScann" 
-  return nmap.ScannScript(TARGET, PORTS, RATE, TYPE)
+func ScannScript(TARGET objects.TargetObject) NmapObjects.ScannResponse {
+  TARGET.TYPE = "ServiceScann" 
+  return nmap.ScannScript(TARGET)
 }

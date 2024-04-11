@@ -1,6 +1,7 @@
 package objects
 
 import (
+  //"bakery/Domain/Object/CurlObjects"
   "bakery/Domain/Object/NmapObjects"
 )
 
@@ -27,4 +28,5 @@ type FuzzingResponse struct {
 
 type PortScannResponse struct {
   NmapResponse NmapObjects.ScannResponse
+
 }
