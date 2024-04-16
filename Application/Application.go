@@ -76,6 +76,10 @@ func ApplicationFuzzing() {
 }
 
 // UTILITIES
+  // REQUESTER
+func Requester(TARGET objects.TargetObject) {
+  Utils.Requester(TARGET)
+}
   // PRINTER
 func Printer(Response objects.Response) {
   var builder strings.Builder
@@ -135,15 +139,15 @@ func TypeM(TARGET objects.TargetObject) {
         var wg sync.WaitGroup
         wg.Add(2)
         
-        go ScannScript(1, &wg, PortEnum, TARGET)
         go ScannService(2, &wg, PortEnum, TARGET)
+        go ScannScript(1, &wg, PortEnum, TARGET)
         
         wg.Wait()
         close(PortEnum)
 
       case "F":
         fmt.Printf("Testing")
-        Utils.Requester()
+        Requester(TARGET)
         //ScannPort(Target.IP, "1234", RATE)
     }
   }

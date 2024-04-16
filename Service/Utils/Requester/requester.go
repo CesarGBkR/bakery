@@ -6,27 +6,44 @@ import (
   "fmt"
   "io/ioutil"
   "net/http"
+  "strings"
 
-  //"bakery/Domain/Object"
+  "bakery/Domain/Object"
 )
 
-func Get() {
-  url := "https://jsonplaceholder.typicode.com/posts/1"
-
-  response, err := http.Get(url)
-  if err != nil {
-    fmt.Println("Error:", err)
+func requester(url string) {
+    response, err := http.Get(url)
+    if err != nil {
+      fmt.Println("Error:", err)
       return
     }
-  defer response.Body.Close()
+    defer response.Body.Close()
 
-  body, err := ioutil.ReadAll(response.Body)
+    body, err := ioutil.ReadAll(response.Body)
   
-  if err != nil {
-    fmt.Println("Error reading response body:", err)
-    return
+    if err != nil {
+      fmt.Println("Error reading response body:", err)
+      return
+    }
+    fmt.Println("GET Response:", string(body))
+}
+
+func Get(TARGET objects.TargetObject) {
+  var PORTS []string 
+  if len(TARGET.PORTS) < 0 || TARGET.PORTS == "1-65535"{
+    PORTS = append(PORTS, "80") 
+    PORTS = append(PORTS, "8080") 
+    PORTS = append(PORTS, "443") 
+  }else{
+    PORTS = strings.Split(TARGET.PORTS, ",")
   }
-  fmt.Println("GET Response:", string(body))
+  for _, Port := range PORTS {
+
+    urlIP := "http://"+TARGET.IP+":"+Port+"/"
+    urlNS := "http://"+TARGET.NS+":"+Port+"/"
+    requester(urlIP)
+    requester(urlNS)
+  }
 }
 
 func Post() {
