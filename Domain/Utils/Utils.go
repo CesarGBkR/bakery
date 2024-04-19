@@ -5,11 +5,11 @@ import (
   
   "bakery/Domain/Utils/Requester"
   "bakery/Domain/Utils/Curl"
-  "bakery/Domain/Object"
+  "bakery/Domain/Object/RequesterObjects"
 )
 
-func Requester(TARGET objects.TargetObject){
- RequesterDomain.Get(TARGET) 
+func Requester(url string) RequesterObjects.Response {
+ return RequesterDomain.Requester(url) 
 }
 
 func Curl() {

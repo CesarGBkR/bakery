@@ -12,6 +12,7 @@ import (
   "bakery/Domain/Object"
   "bakery/Domain/Enumeration/PortScann"
   "bakery/Domain/Utils"
+  "bakery/Domain/Object/RequesterObjects"
 )
 
 // SCAN
@@ -77,8 +78,41 @@ func ApplicationFuzzing() {
 
 // UTILITIES
   // REQUESTER
-func Requester(TARGET objects.TargetObject) {
-  Utils.Requester(TARGET)
+func Requester(url string) RequesterObjects.Response{
+  //defer wg.Done()
+  return Utils.Requester(url)
+}
+  // Web Discover
+func WebFinder(TARGET objects.TargetObject) {
+  var PORTS []string 
+  var Responses []RequesterObjects.Response
+  //WebFinder := make(chan RequesterObjects.Response, 2)  
+  //var wg sync.WaitGroup
+  
+  if len(TARGET.PORTS) < 0 || strings.Contains(TARGET.PORTS, "-"){
+    //wg.Add(3)
+    PORTS = append(PORTS, "80","8080","443") 
+  }else{
+    PORTS = strings.Split(TARGET.PORTS, ",")
+    //wg.Add(len(PORTS))
+  }
+  for _, Port := range PORTS {
+
+    urlIP := "http://"+TARGET.IP+":"+Port+"/"
+    urlNS := "http://"+TARGET.NS+":"+Port+"/"
+    fmt.Printf("\nRequest")
+    Responses = append(Responses, Requester(urlIP))
+    Responses = append(Responses, Requester(urlNS))
+    fmt.Printf("\nRD")
+  }
+  //wg.Wait()
+  fmt.Printf("\nWaited\n")
+  //close(WebFinder)
+  fmt.Printf("\nClosed\n")
+  for _, Response := range Responses {
+    fmt.Printf("\n%v", Response)
+
+  }
 }
   // PRINTER
 func Printer(Response objects.Response) {
@@ -96,6 +130,8 @@ func Printer(Response objects.Response) {
           if PORTS[0].Services.Version != "" {
             fmt.Fprintf(w,"STATE\tPORT\tPROTOCOL\tS.Name\tS.Product\tS.Version\tS.Extra\n")
             for _, port := range PORTS {
+
+
               fmt.Fprintf(w,"%s\t%d\t%s\t%s\t%s\t%s\t%s\n", port.State, port.ID, port.Protocol, port.Services.Name, port.Services.Product, port.Services.Version, port.Services.Extra)
             }
           }else {
@@ -147,7 +183,7 @@ func TypeM(TARGET objects.TargetObject) {
 
       case "F":
         fmt.Printf("Testing")
-        Requester(TARGET)
+        WebFinder(TARGET)
         //ScannPort(Target.IP, "1234", RATE)
     }
   }

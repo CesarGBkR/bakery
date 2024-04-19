@@ -3,10 +3,11 @@ package RequesterDomain
 import (
   "bakery/Service/Utils/Requester"
   "bakery/Domain/Object"
+  "bakery/Domain/Object/RequesterObjects"
 )
 
-func Get(TARGET objects.TargetObject) {
-  requester.Get(TARGET)
+func Requester(url string) RequesterObjects.Response{
+   return requester.Requester(url)
 }
 
 func Post(TARGET objects.TargetObject) {
