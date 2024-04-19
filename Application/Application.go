@@ -110,7 +110,7 @@ func WebFinder(TARGET objects.TargetObject) {
   //close(WebFinder)
   fmt.Printf("\nClosed\n")
   for _, Response := range Responses {
-    fmt.Printf("\n%v", Response)
+    fmt.Printf("\n%v", Responset)
 
   }
 }
