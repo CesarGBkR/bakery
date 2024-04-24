@@ -1,39 +1,39 @@
 package NmapObjects
 
 type ScannResponse struct {
-  Hosts Host
-  Warn []string
-  ErrBuild error
-  ErrExec error
+	Hosts    Host
+	Warn     []string
+	ErrBuild error
+	ErrExec  error
 }
 
 type ScannRequest struct {
-  TARGET string 
-  PORTS string 
-  RATE int
+	TARGET string
+	PORTS  string
+	RATE   int
 }
 
 type Host struct {
-  Ports []Port
-  OS string
+	Ports []Port
+	OS    string
 }
 
 type Port struct {
-  State string
-  ID uint16
-  Protocol string
-  Services Service
-  Scripts []Script
+	State    string
+	ID       uint16
+	Protocol string
+	Services Service
+	Scripts  []Script
 }
 
 type Service struct {
-  Name string
-  Version string
-  Product string
-  Extra string
+	Name    string
+	Version string
+	Product string
+	Extra   string
 }
 
 type Script struct {
-  ID string
-  Output string
+	ID     string
+	Output string
 }

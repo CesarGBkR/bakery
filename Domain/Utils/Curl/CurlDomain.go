@@ -1,9 +1,9 @@
 package CurlDomain
 
 import (
-  "bakery/Service/Utils/Curl"
+	"bakery/Service/Utils/Curl"
 )
 
 func Curl() {
-  curl.Curl()
+	curl.Curl()
 }

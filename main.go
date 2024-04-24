@@ -1,9 +1,9 @@
 package main
 
 import (
-  "bakery/User"
+	"bakery/User"
 )
 
 func main() {
-  User.User()
+	User.User()
 }

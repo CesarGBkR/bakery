@@ -1,24 +1,23 @@
 package curl
 
 import (
-  "fmt"
-
-  //curl "github.com/andelf/go-curl"
+	"fmt"
+	//curl "github.com/andelf/go-curl"
 )
 
 func Curl() {
-  //easy := curl.EasyInit()
-  //defer easy.Cleanup()
-   //easy.Setopt(curl.OPT_URL, "http://www.baidu.com/")
-     // make a callback function
-   //fooTest := func (buf []byte, userdata interface{}) bool {
-     //println("DEBUG: size=>", len(buf))
-     //println("DEBUG: content=>", string(buf))
-       //return true
-   //}
-   //easy.Setopt(curl.OPT_WRITEFUNCTION, fooTest)
-   //if err := easy.Perform(); err != nil {
-     //fmt.Printf("ERROR: %v\n", err)
-   //}
-   fmt.Printf("No curl unu")
+	//easy := curl.EasyInit()
+	//defer easy.Cleanup()
+	//easy.Setopt(curl.OPT_URL, "http://www.baidu.com/")
+	// make a callback function
+	//fooTest := func (buf []byte, userdata interface{}) bool {
+	//println("DEBUG: size=>", len(buf))
+	//println("DEBUG: content=>", string(buf))
+	//return true
+	//}
+	//easy.Setopt(curl.OPT_WRITEFUNCTION, fooTest)
+	//if err := easy.Perform(); err != nil {
+	//fmt.Printf("ERROR: %v\n", err)
+	//}
+	fmt.Printf("No curl unu")
 }
